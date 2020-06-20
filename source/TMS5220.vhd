@@ -31,12 +31,14 @@
 
 library ieee;
 	use ieee.std_logic_1164.all;
-	use ieee.std_logic_unsigned.all;
+--	use ieee.std_logic_unsigned.all;
 	use ieee.numeric_std.all;
---pragma translate_off
-	use ieee.std_logic_textio.all;
+--  pragma translate_off
+--  RTL_SYNTHESIS OFF
+--	use ieee.std_logic_textio.all;
 	use std.textio.all;
---pragma translate_on
+--  RTL_SYNTHESIS ON
+--  pragma translate_on
 
 entity TMS5220 is
 	port (
@@ -265,7 +267,7 @@ begin
 	begin
 		wait until rising_edge(CLK);
 		if (m_ENA = '1') then
-			phictr <= phictr + 1;
+			phictr <= std_logic_vector(unsigned(phictr) + 1);
 			if (phictr = "11") then
 				-- time period counter
 				if (m_T = 20) then
@@ -584,7 +586,7 @@ begin
 
 	-- write select handler, FIFO, parameter parser
 	p_WS : process
-		variable	s				: line;
+		variable	s				: std.textio.line;
 	begin
 		wait until rising_edge(CLK);
 		if (m_ENA = '1') then
@@ -739,18 +741,19 @@ begin
 						else
 							m_inhibit <= '0';
 						end if;
-					when others => null;
+					--when others => null;
 				end case;
 			end if;
 		end if;
 	end process;
 
---pragma translate_off
+-- pragma translate_off
+-- RTL_SYNTHESIS OFF    
 	p_DBG : process
 		type myfile is file of integer;
-		file		ofile			: TEXT open WRITE_MODE is "sim.log";
+		file		ofile			: std.textio.TEXT open WRITE_MODE is "sim.log";
 		file		oraw			: myfile open WRITE_MODE is "sound.raw";
-		variable	s				: line;
+		variable	s				: std.textio.line;
 	begin
 		wait until rising_edge(CLK);
 		if (m_ENA = '1') and (m_TALKD = '1') then
@@ -759,106 +762,107 @@ begin
 			end if;
 
 			if (m_T = 17) and (m_PHI(3)='0') then
-				WRITE(s, "RNG="          ); HWRITE(s, "000"&m_RNG);  WRITE(s, ",");
-				WRITE(s, "sample="       ); WRITE(s, this_sample);   WRITE(s, ",");
-				WRITE(s, "m_IC="         ); WRITE(s, m_IC);          WRITE(s, ",");
-				WRITE(s, "m_PC="         ); WRITE(s, m_PC);          WRITE(s, ",");
-				if (m_cycA = '1') then WRITE(s, "cycle_A, "); else  WRITE(s, "cycle_B,"); end if;
-				WRITE(s, "m_pitch_count="); WRITE(s, m_pitch_count); WRITE(s, ",");
-				WRITE(s, "m_pitch_zero=" ); WRITE(s, m_pitch_zero);  WRITE(s, ",");
-				WRITE(s, "m_inhibit="    ); WRITE(s, m_inhibit);     WRITE(s, ",");
-				WRITE(s, "m_OLDE="       ); WRITE(s, m_OLDE);        WRITE(s, ",");
-				WRITE(s, "m_OLDP="       ); WRITE(s, m_OLDP);        WRITE(s, ",");
-				WRITE(s, "m_DDIS="       ); WRITE(s, m_DDIS);        WRITE(s, ",");
-				WRITE(s, "m_SPEN="       ); WRITE(s, m_SPEN);        WRITE(s, ",");
-				WRITE(s, "m_TALK="       ); WRITE(s, m_TALK);        WRITE(s, ",");
-				WRITE(s, "m_TALKD="      ); WRITE(s, m_TALKD);       WRITE(s, ",");
-				WRITE(s, "m_uv_zpar="    ); WRITE(s, m_uv_zpar);     WRITE(s, " ");
+              WRITE(s, String'("RNG="          ));  HWRITE(s, "000"&m_RNG);  WRITE(s, String'(","));
+              WRITE(s, String'("sample="       ));  WRITE(s, this_sample);   WRITE(s, String'(","));
+				WRITE(s, String'("m_IC="         )); WRITE(s, m_IC);          WRITE(s, String'(","));
+				WRITE(s, String'("m_PC="         )); WRITE(s, m_PC);          WRITE(s, String'(","));
+				if (m_cycA = '1') then WRITE(s, String'("cycle_A, ")); else  WRITE(s, String'("cycle_B,")); end if;
+				WRITE(s, String'("m_pitch_count=")); WRITE(s, m_pitch_count); WRITE(s, String'(","));
+				WRITE(s, String'("m_pitch_zero=" )); WRITE(s, m_pitch_zero);  WRITE(s, String'(","));
+				WRITE(s, String'("m_inhibit="    )); WRITE(s, m_inhibit);     WRITE(s, String'(","));
+				WRITE(s, String'("m_OLDE="       )); WRITE(s, m_OLDE);        WRITE(s, String'(","));
+				WRITE(s, String'("m_OLDP="       )); WRITE(s, m_OLDP);        WRITE(s, String'(","));
+				WRITE(s, String'("m_DDIS="       )); WRITE(s, m_DDIS);        WRITE(s, String'(","));
+				WRITE(s, String'("m_SPEN="       )); WRITE(s, m_SPEN);        WRITE(s, String'(","));
+				WRITE(s, String'("m_TALK="       )); WRITE(s, m_TALK);        WRITE(s, String'(","));
+				WRITE(s, String'("m_TALKD="      )); WRITE(s, m_TALKD);       WRITE(s, String'(","));
+				WRITE(s, String'("m_uv_zpar="    )); WRITE(s, m_uv_zpar);     WRITE(s, String'(" "));
 --				WRITE(s, "-- "); WRITE(s, now);
 				WRITELINE(ofile, s);
 
-				WRITE(s, "Lattice:");
-				WRITE(s, " previous_energy="); WRITE(s, m_previous_energy);
-				WRITE(s, ", current_energy="); WRITE(s, m_current_energy);
-				WRITE(s, ", excitation=");     WRITE(s, m_excitation_data);
+				WRITE(s, String'("Lattice:"));
+				WRITE(s, String'(" previous_energy=")); WRITE(s, m_previous_energy);
+				WRITE(s, String'(", current_energy=")); WRITE(s, m_current_energy);
+				WRITE(s, String'(", excitation="));     WRITE(s, m_excitation_data);
 
-				WRITE(s, ", m_u=");
-				WRITE(s, m_u(10)); WRITE(s, ",");
-				WRITE(s, m_u( 9)); WRITE(s, ",");
-				WRITE(s, m_u( 8)); WRITE(s, ",");
-				WRITE(s, m_u( 7)); WRITE(s, ",");
-				WRITE(s, m_u( 6)); WRITE(s, ",");
-				WRITE(s, m_u( 5)); WRITE(s, ",");
-				WRITE(s, m_u( 4)); WRITE(s, ",");
-				WRITE(s, m_u( 3)); WRITE(s, ",");
-				WRITE(s, m_u( 2)); WRITE(s, ",");
-				WRITE(s, m_u( 1)); WRITE(s, ",");
+				WRITE(s, String'(", m_u="));
+				WRITE(s, m_u(10)); WRITE(s, String'(","));
+				WRITE(s, m_u( 9)); WRITE(s, String'(","));
+				WRITE(s, m_u( 8)); WRITE(s, String'(","));
+				WRITE(s, m_u( 7)); WRITE(s, String'(","));
+				WRITE(s, m_u( 6)); WRITE(s, String'(","));
+				WRITE(s, m_u( 5)); WRITE(s, String'(","));
+				WRITE(s, m_u( 4)); WRITE(s, String'(","));
+				WRITE(s, m_u( 3)); WRITE(s, String'(","));
+				WRITE(s, m_u( 2)); WRITE(s, String'(","));
+				WRITE(s, m_u( 1)); WRITE(s, String'(","));
 				WRITE(s, m_u( 0));
 
-				WRITE(s, ", m_x=");
-				WRITE(s, m_x( 9)); WRITE(s, ",");
-				WRITE(s, m_x( 8)); WRITE(s, ",");
-				WRITE(s, m_x( 7)); WRITE(s, ",");
-				WRITE(s, m_x( 6)); WRITE(s, ",");
-				WRITE(s, m_x( 5)); WRITE(s, ",");
-				WRITE(s, m_x( 4)); WRITE(s, ",");
-				WRITE(s, m_x( 3)); WRITE(s, ",");
-				WRITE(s, m_x( 2)); WRITE(s, ",");
-				WRITE(s, m_x( 1)); WRITE(s, ",");
+				WRITE(s, String'(", m_x="));
+				WRITE(s, m_x( 9)); WRITE(s, String'(","));
+				WRITE(s, m_x( 8)); WRITE(s, String'(","));
+				WRITE(s, m_x( 7)); WRITE(s, String'(","));
+				WRITE(s, m_x( 6)); WRITE(s, String'(","));
+				WRITE(s, m_x( 5)); WRITE(s, String'(","));
+				WRITE(s, m_x( 4)); WRITE(s, String'(","));
+				WRITE(s, m_x( 3)); WRITE(s, String'(","));
+				WRITE(s, m_x( 2)); WRITE(s, String'(","));
+				WRITE(s, m_x( 1)); WRITE(s, String'(","));
 				WRITE(s, m_x( 0));
 				WRITELINE(ofile, s);
 
-				WRITE(s, "current: ");
-				WRITE(s, m_current_energy); WRITE(s, ",");
-				WRITE(s, m_current_pitch);  WRITE(s, ",");
-				WRITE(s, m_current_k(0));   WRITE(s, ",");
-				WRITE(s, m_current_k(1));   WRITE(s, ",");
-				WRITE(s, m_current_k(2));   WRITE(s, ",");
-				WRITE(s, m_current_k(3));   WRITE(s, ",");
-				WRITE(s, m_current_k(4));   WRITE(s, ",");
-				WRITE(s, m_current_k(5));   WRITE(s, ",");
-				WRITE(s, m_current_k(6));   WRITE(s, ",");
-				WRITE(s, m_current_k(7));   WRITE(s, ",");
-				WRITE(s, m_current_k(8));   WRITE(s, ",");
+				WRITE(s, String'("current: "));
+				WRITE(s, m_current_energy); WRITE(s, String'(","));
+				WRITE(s, m_current_pitch);  WRITE(s, String'(","));
+				WRITE(s, m_current_k(0));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(1));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(2));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(3));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(4));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(5));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(6));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(7));   WRITE(s, String'(","));
+				WRITE(s, m_current_k(8));   WRITE(s, String'(","));
 				WRITE(s, m_current_k(9));
 				WRITELINE(ofile, s);
 
-				WRITE(s, "target : ");
-				WRITE(s, energytable(m_new_frame_energy_idx)); WRITE(s, ",");
-				WRITE(s, pitchtable(m_new_frame_pitch_idx)  ); WRITE(s, ",");
-				WRITE(s, ktable(0,  m_new_frame_k_idx(0))   ); WRITE(s, ",");
-				WRITE(s, ktable(1,  m_new_frame_k_idx(1))   ); WRITE(s, ",");
-				WRITE(s, ktable(2,  m_new_frame_k_idx(2))   ); WRITE(s, ",");
-				WRITE(s, ktable(3,  m_new_frame_k_idx(3))   ); WRITE(s, ",");
+				WRITE(s, String'("target : "));
+				WRITE(s, energytable(m_new_frame_energy_idx)); WRITE(s, String'(","));
+				WRITE(s, pitchtable(m_new_frame_pitch_idx)  ); WRITE(s, String'(","));
+				WRITE(s, ktable(0,  m_new_frame_k_idx(0))   ); WRITE(s, String'(","));
+				WRITE(s, ktable(1,  m_new_frame_k_idx(1))   ); WRITE(s, String'(","));
+				WRITE(s, ktable(2,  m_new_frame_k_idx(2))   ); WRITE(s, String'(","));
+				WRITE(s, ktable(3,  m_new_frame_k_idx(3))   ); WRITE(s, String'(","));
 				if (m_uv_zpar = '0') then
-					WRITE(s, ktable(4,  m_new_frame_k_idx(4))); WRITE(s, ",");
-					WRITE(s, ktable(5,  m_new_frame_k_idx(5))); WRITE(s, ",");
-					WRITE(s, ktable(6,  m_new_frame_k_idx(6))); WRITE(s, ",");
-					WRITE(s, ktable(7,  m_new_frame_k_idx(7))); WRITE(s, ",");
-					WRITE(s, ktable(8,  m_new_frame_k_idx(8))); WRITE(s, ",");
+					WRITE(s, ktable(4,  m_new_frame_k_idx(4))); WRITE(s, String'(","));
+					WRITE(s, ktable(5,  m_new_frame_k_idx(5))); WRITE(s, String'(","));
+					WRITE(s, ktable(6,  m_new_frame_k_idx(6))); WRITE(s, String'(","));
+					WRITE(s, ktable(7,  m_new_frame_k_idx(7))); WRITE(s, String'(","));
+					WRITE(s, ktable(8,  m_new_frame_k_idx(8))); WRITE(s, String'(","));
 					WRITE(s, ktable(9,  m_new_frame_k_idx(9)));
 				else
-					WRITE(s, "0,0,0,0,0,0");
+					WRITE(s, String'("0,0,0,0,0,0"));
 				end if;
 
-				WRITE(s, " indexes: ");
-				WRITE(s, m_new_frame_energy_idx); WRITE(s, ",");
-				WRITE(s, m_new_frame_repeat);     WRITE(s, ",");
-				WRITE(s, m_new_frame_pitch_idx);  WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(0));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(1));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(2));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(3));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(4));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(5));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(6));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(7));   WRITE(s, ",");
-				WRITE(s, m_new_frame_k_idx(8));   WRITE(s, ",");
+				WRITE(s, String'(" indexes: "));
+				WRITE(s, m_new_frame_energy_idx); WRITE(s, String'(","));
+				WRITE(s, m_new_frame_repeat);     WRITE(s, String'(","));
+				WRITE(s, m_new_frame_pitch_idx);  WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(0));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(1));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(2));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(3));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(4));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(5));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(6));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(7));   WRITE(s, String'(","));
+				WRITE(s, m_new_frame_k_idx(8));   WRITE(s, String'(","));
 				WRITE(s, m_new_frame_k_idx(9));
 				WRITELINE(ofile, s);
 			end if;
 		end if;
 	end process;
---pragma translate_on
+-- RTL_SYNTHESIS ON
+-- pragma translate_on
 
 end architecture;
