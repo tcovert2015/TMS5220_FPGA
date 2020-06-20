@@ -34,10 +34,8 @@ library ieee;
 --	use ieee.std_logic_unsigned.all;
 	use ieee.numeric_std.all;
 --  pragma translate_off
---  RTL_SYNTHESIS OFF
 --	use ieee.std_logic_textio.all;
 	use std.textio.all;
---  RTL_SYNTHESIS ON
 --  pragma translate_on
 
 entity TMS5220 is
@@ -748,7 +746,6 @@ begin
 	end process;
 
 -- pragma translate_off
--- RTL_SYNTHESIS OFF    
 	p_DBG : process
 		type myfile is file of integer;
 		file		ofile			: std.textio.TEXT open WRITE_MODE is "sim.log";
@@ -862,7 +859,6 @@ begin
 			end if;
 		end if;
 	end process;
--- RTL_SYNTHESIS ON
 -- pragma translate_on
 
 end architecture;
